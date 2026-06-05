@@ -1,0 +1,6 @@
+django_app/venv/
+django_app/db.sqlite3
+django_app/staticfiles/
+.DS_Store
+__pycache__/
+*.pyc

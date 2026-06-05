@@ -1,0 +1,71 @@
+{% extends 'todo/base.html' %}
+
+{% block content %}
+<h1 class="text-3xl font-bold text-center my-6 text-indigo-600">⚡ Super To-Do App</h1>
+
+<!-- Form Tambah Tugas -->
+<form method="POST" class="bg-white p-6 rounded-lg shadow-md mb-6 space-y-4">
+    {% csrf_token %}
+    <div>
+        <input type="text" name="title" placeholder="Judul Tugas Baru..." required class="w-full border p-2 rounded focus:outline-indigo-500">
+    </div>
+    <div>
+        <textarea name="description" placeholder="Deskripsi (Opsional)" class="w-full border p-2 rounded focus:outline-indigo-500"></textarea>
+    </div>
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Prioritas</label>
+            <select name="priority" class="w-full border p-2 rounded focus:outline-indigo-500">
+                <option value="L">Low</option>
+                <option value="M" selected>Medium</option>
+                <option value="H">High</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Tenggat Waktu</label>
+            <input type="datetime-local" name="due_date" class="w-full border p-2 rounded focus:outline-indigo-500">
+        </div>
+    </div>
+    <button type="submit" class="w-full bg-indigo-600 text-white p-2 rounded font-semibold hover:bg-indigo-700 transition">Tambah Tugas</button>
+</form>
+
+<!-- Daftar Tugas -->
+<div class="space-y-3">
+    {% for todo in todos %}
+    <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-between border-l-4 
+        {% if todo.is_completed %} border-gray-400 opacity-60 
+        {% elif todo.priority == 'H' %} border-red-500 
+        {% elif todo.priority == 'M' %} border-yellow-500 
+        {% else %} border-green-500 {% endif %}">
+        
+        <div class="flex-1 pr-4">
+            <h3 class="text-lg font-bold {% if todo.is_completed %} line-through text-gray-500 {% endif %}">
+                {{ todo.title }}
+                <span class="text-xs px-2 py-0.5 rounded ml-2 
+                    {% if todo.priority == 'H' %} bg-red-100 text-red-800 
+                    {% elif todo.priority == 'M' %} bg-yellow-100 text-yellow-800 
+                    {% else %} bg-green-100 text-green-800 {% endif %}">
+                    {{ todo.get_priority_display }}
+                </span>
+            </h3>
+            {% if todo.description %}<p class="text-sm text-gray-600 mt-1">{{ todo.description }}</p>{% endif %}
+            
+            {% if todo.due_date %}
+            <p class="text-xs mt-2 {% if todo.is_overdue %} text-red-600 font-bold {% else %} text-gray-400 {% endif %}">
+                ⏰ Batas: {{ todo.due_date|date:"d M Y, H:i" }} {% if todo.is_overdue %}(Terlambat!){% endif %}
+            </p>
+            {% endif %}
+        </div>
+
+        <div class="flex items-center gap-2">
+            <a href="{% url 'todo_toggle' todo.pk %}" class="px-3 py-1 text-sm font-semibold rounded text-white {% if todo.is_completed %} bg-gray-500 hover:bg-gray-600 {% else %} bg-emerald-500 hover:bg-emerald-600 {% endif %}">
+                {% if todo.is_completed %} Batal {% else %} Selesai {% endif %}
+            </a>
+            <a href="{% url 'todo_delete' todo.pk %}" class="px-3 py-1 text-sm font-semibold rounded bg-rose-500 hover:bg-rose-600 text-white" onclick="return confirm('Hapus tugas ini?')">Hapus</a>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-center text-gray-500 py-6">Belum ada tugas. Silakan tambah di atas!</p>
+    {% endfor %}
+</div>
+{% endblock %}
